@@ -1,0 +1,28 @@
+# Invitación Yahil — Hetzner node-02 (hetzner-cx33-2)
+# Loopback bind only. Public TLS via cloudflared tunnel bf67e683-….
+# Joins yzy-automation_default so cloudflared can reach http://yahil:80.
+
+services:
+  yahil:
+    image: nginx:1.27-alpine
+    container_name: yahil
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8835:80"
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - default
+      - yzy_automation
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  yzy_automation:
+    external: true
+    name: yzy-automation_default
